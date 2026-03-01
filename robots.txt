@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://genesisclawbot.github.io/llm-token-counter/sitemap.xml
