@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Primary SEO -->
+  <title>LLM Token Counter &amp; API Cost Calculator - Claude, GPT-4, Gemini</title>
+  <meta name="description" content="Free LLM token counter and API cost calculator. Paste text to instantly see token counts and costs for Claude, GPT-4o, Gemini, and more. Works offline, no data sent.">
+  <meta name="keywords" content="llm token counter, claude api token counter, openai token count, llm api cost calculator, gpt-4 token count, gemini token count, api cost estimator">
+  <meta name="author" content="Jamie Cole">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://genesisclawbot.github.io/llm-token-counter/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://genesisclawbot.github.io/llm-token-counter/">
+  <meta property="og:title" content="LLM Token Counter &amp; API Cost Calculator">
+  <meta property="og:description" content="Paste any text and instantly see token counts and API costs for Claude, GPT-4o, Gemini 2.0 Flash, and more. Free, works offline.">
+  <meta property="og:image" content="https://genesisclawbot.github.io/llm-token-counter/og-image.png">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="LLM Token Counter &amp; API Cost Calculator">
+  <meta name="twitter:description" content="Paste text, see token counts and costs for Claude, GPT-4o, Gemini. Free, client-side, no data sent.">
+  <meta name="twitter:creator" content="@clawgenesis">
+
+  <!-- Schema.org SoftwareApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "LLM Token Counter & API Cost Calculator",
+    "url": "https://genesisclawbot.github.io/llm-token-counter/",
+    "description": "Free tool to estimate token counts and API costs for Claude, GPT-4o, and Gemini. Client-side, no data sent, works offline.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Jamie Cole",
+      "url": "https://genesisclawbot.github.io"
+    },
+    "featureList": [
+      "Real-time token count estimation",
+      "API cost calculation for Claude, GPT-4o, Gemini",
+      "Code detection for more accurate estimates",
+      "Adjustable input/output ratio",
+      "Context window usage indicator",
+      "Offline capable"
+    ],
+    "browserRequirements": "Requires JavaScript"
+  }
+  </script>
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔢</text></svg>">
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <div class="header-inner">
+        <a href="/" class="logo">token<span>calc</span></a>
+        <span class="tagline">LLM API token counter &amp; cost estimator</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+
+      <!-- Hero / H1 -->
+      <section class="hero">
+        <h1>LLM Token Counter &amp; API Cost Calculator</h1>
+        <p class="hero-sub">
+          Paste any text and instantly see estimated token counts and API costs for Claude, GPT-4o, Gemini, and more.
+          Works offline. No data leaves your browser.
+        </p>
+      </section>
+
+      <!-- Text input -->
+      <section class="input-section" aria-label="Text input">
+        <div class="input-label">
+          <label for="text-input">Your Text</label>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="code-badge" id="code-badge" role="status" aria-live="polite">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+              </svg>
+              Code detected — using 3.5 chars/token
+            </div>
+            <span class="char-count" id="char-count">0 chars</span>
+          </div>
+        </div>
+        <textarea
+          id="text-input"
+          placeholder="Paste your prompt, document, or code here..."
+          aria-label="Input text to count tokens"
+          spellcheck="false"
+        ></textarea>
+      </section>
+
+      <!-- Quick stats -->
+      <section class="stats-bar" aria-label="Token count summary" role="region">
+        <div class="stat-item">
+          <span class="stat-value accent" id="stat-tokens">0</span>
+          <span class="stat-label">Est. Tokens</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat-item">
+          <span class="stat-value" id="stat-chars">0</span>
+          <span class="stat-label">Characters</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat-item">
+          <span class="stat-value" id="stat-words">0</span>
+          <span class="stat-label">Words</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat-item">
+          <span class="stat-value" id="stat-lines">0</span>
+          <span class="stat-label">Lines</span>
+        </div>
+      </section>
+
+      <!-- Output ratio slider -->
+      <section class="ratio-section" aria-label="Output token ratio">
+        <div class="ratio-header">
+          <span class="ratio-title">Output token ratio</span>
+          <span class="ratio-value" id="ratio-display">1x (same as input)</span>
+        </div>
+        <div class="ratio-row">
+          <span class="ratio-label">Input only</span>
+          <input
+            type="range"
+            id="output-ratio"
+            min="0"
+            max="4"
+            step="0.5"
+            value="1"
+            aria-label="Output token ratio multiplier"
+          >
+          <span class="ratio-label" style="text-align:right">4x output</span>
+        </div>
+        <p style="font-size:0.75rem;color:var(--text-dim);margin-top:8px;">
+          Adjust if you expect the model to generate significantly more or less than your input. Costs shown = input + (ratio × input) tokens.
+        </p>
+      </section>
+
+      <!-- Pricing table -->
+      <section class="pricing-section" aria-label="API pricing by model">
+        <h2>Cost by Model</h2>
+
+        <div class="filter-tabs" role="tablist" aria-label="Filter by provider">
+          <button class="filter-tab active" data-provider="all" role="tab" aria-selected="true">All</button>
+          <button class="filter-tab" data-provider="Anthropic" role="tab" aria-selected="false" style="color:#cc785c;border-color:rgba(204,120,92,0.3)">Anthropic</button>
+          <button class="filter-tab" data-provider="OpenAI" role="tab" aria-selected="false" style="color:#10a37f;border-color:rgba(16,163,127,0.3)">OpenAI</button>
+          <button class="filter-tab" data-provider="Google" role="tab" aria-selected="false" style="color:#4285f4;border-color:rgba(66,133,244,0.3)">Google</button>
+        </div>
+
+        <div class="pricing-grid" id="pricing-grid" role="list">
+          <div class="empty-state" id="empty-state">Paste text above to see cost estimates</div>
+        </div>
+      </section>
+
+      <!-- Estimate accuracy note -->
+      <div class="estimate-note" role="note">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <div>
+          <strong>Estimates only.</strong> This tool uses a character-based approximation (~4 chars/token for prose, ~3.5 for code).
+          Actual token counts depend on each model's tokenizer - for exact counts, use
+          <a href="https://platform.openai.com/tokenizer" target="_blank" rel="noopener">OpenAI's tokenizer</a> or
+          Anthropic's <code style="font-size:0.78rem;background:rgba(255,255,255,0.05);padding:1px 5px;border-radius:3px;">count_tokens</code> API.
+          Pricing is hardcoded and may be outdated - check provider pricing pages for current rates.
+        </div>
+      </div>
+
+      <!-- About / SEO content -->
+      <section class="about-section">
+        <h2>How It Works</h2>
+        <p>
+          This is a client-side LLM token counter. Nothing you type is sent anywhere - all processing happens in your browser.
+          It's useful for getting a quick ballpark before you run something expensive, or for checking if your prompt will fit in a model's context window.
+        </p>
+        <p>
+          The approximation (~4 characters per token) holds reasonably well for English text. Code tends to tokenize differently
+          since punctuation, brackets, and operators often get their own tokens, so we switch to ~3.5 chars/token when code is detected.
+          For anything where exact counts matter, use the model's official tokenizer.
+        </p>
+        <p>
+          Pricing covers Claude Sonnet and Haiku (Anthropic), GPT-4o and GPT-4o mini (OpenAI), and Gemini 2.0 Flash and 1.5 Pro (Google).
+          All prices in USD per 1M tokens. Last updated March 2026.
+        </p>
+      </section>
+
+      <!-- FAQ for SEO -->
+      <section class="about-section" itemscope itemtype="https://schema.org/FAQPage">
+        <h2>Common Questions</h2>
+
+        <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question" style="margin-bottom:16px;">
+          <h3 itemprop="name" style="font-size:0.9rem;font-weight:600;margin-bottom:6px;color:var(--text);">How accurate is this token counter?</h3>
+          <div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+            <p itemprop="text" style="font-size:0.85rem;color:var(--text-muted);line-height:1.6;">
+              Typically within 10-15% for English prose. The 4 chars/token rule is a well-known approximation that works across GPT, Claude, and Gemini.
+              For code, punctuation-heavy text, or non-English languages, accuracy drops. For exact counts you need the model's tokenizer.
+            </p>
+          </div>
+        </div>
+
+        <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question" style="margin-bottom:16px;">
+          <h3 itemprop="name" style="font-size:0.9rem;font-weight:600;margin-bottom:6px;color:var(--text);">Which Claude model has the cheapest API cost?</h3>
+          <div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+            <p itemprop="text" style="font-size:0.85rem;color:var(--text-muted);line-height:1.6;">
+              Claude 3.5 Haiku at $0.80 input / $4.00 output per 1M tokens. For OpenAI, GPT-4o mini ($0.15/$0.60) is the budget option.
+              Gemini 1.5 Flash ($0.075/$0.30) and Gemini 2.0 Flash ($0.10/$0.40) are currently the cheapest options with large context windows.
+            </p>
+          </div>
+        </div>
+
+        <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <h3 itemprop="name" style="font-size:0.9rem;font-weight:600;margin-bottom:6px;color:var(--text);">Does this tool send my text anywhere?</h3>
+          <div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+            <p itemprop="text" style="font-size:0.85rem;color:var(--text-muted);line-height:1.6;">
+              No. Everything runs in your browser. There's no backend, no analytics collecting your text, no API calls.
+              You can load the page, disconnect from the internet, and it still works.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <span class="footer-text">Free tool. No sign-up. No data collected.</span>
+        <a href="https://genesisclawbot.github.io" class="footer-link">More tools →</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="pricing.js"></script>
+  <script src="tokenizer.js"></script>
+  <script>
+    // Main app logic
+    const textInput = document.getElementById('text-input');
+    const charCount = document.getElementById('char-count');
+    const codeBadge = document.getElementById('code-badge');
+    const statTokens = document.getElementById('stat-tokens');
+    const statChars = document.getElementById('stat-chars');
+    const statWords = document.getElementById('stat-words');
+    const statLines = document.getElementById('stat-lines');
+    const pricingGrid = document.getElementById('pricing-grid');
+    const emptyState = document.getElementById('empty-state');
+    const outputRatio = document.getElementById('output-ratio');
+    const ratioDisplay = document.getElementById('ratio-display');
+    const filterTabs = document.querySelectorAll('.filter-tab');
+
+    let currentTokens = 0;
+    let currentOutputRatio = 1;
+    let activeProvider = 'all';
+
+    // Update output ratio display
+    outputRatio.addEventListener('input', () => {
+      currentOutputRatio = parseFloat(outputRatio.value);
+      const label = currentOutputRatio === 0
+        ? 'Input only'
+        : currentOutputRatio === 1
+          ? '1x (same as input)'
+          : `${currentOutputRatio}x output`;
+      ratioDisplay.textContent = label;
+      renderPricingGrid(currentTokens);
+    });
+
+    // Provider filter tabs
+    filterTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        filterTabs.forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        activeProvider = tab.dataset.provider;
+        renderPricingGrid(currentTokens);
+      });
+    });
+
+    // Main input handler - debounced for performance
+    let debounceTimer;
+    textInput.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(update, 60);
+    });
+
+    function update() {
+      const text = textInput.value;
+      const { tokens, isCodeDetected } = estimateTokens(text);
+      currentTokens = tokens;
+
+      // Char counter
+      const chars = text.length;
+      charCount.textContent = chars.toLocaleString() + ' chars';
+
+      // Code badge
+      if (isCodeDetected) {
+        codeBadge.classList.add('visible');
+      } else {
+        codeBadge.classList.remove('visible');
+      }
+
+      // Stats bar
+      statTokens.textContent = formatTokens(tokens);
+      statChars.textContent = chars.toLocaleString();
+      statWords.textContent = text.trim() === ''
+        ? '0'
+        : text.trim().split(/\s+/).length.toLocaleString();
+      statLines.textContent = text === ''
+        ? '0'
+        : text.split('\n').length.toLocaleString();
+
+      renderPricingGrid(tokens);
+    }
+
+    function renderPricingGrid(inputTokens) {
+      const filteredModels = activeProvider === 'all'
+        ? MODELS
+        : MODELS.filter(m => m.provider === activeProvider);
+
+      if (inputTokens === 0) {
+        pricingGrid.innerHTML = '<div class="empty-state" id="empty-state">Paste text above to see cost estimates</div>';
+        return;
+      }
+
+      const outputTokens = Math.round(inputTokens * currentOutputRatio);
+      const totalTokens = inputTokens + outputTokens;
+
+      const cards = filteredModels.map(model => {
+        const inputCost = calcCost(inputTokens, model.inputPer1M);
+        const outputCost = calcCost(outputTokens, model.outputPer1M);
+        const totalCost = inputCost + outputCost;
+        const usage = contextUsage(totalTokens, model.contextWindow);
+        const fillPct = Math.max(0.5, Math.min(100, parseFloat(usage.pct)));
+
+        return `
+          <div class="model-card" role="listitem" aria-label="${model.name}">
+            <div class="provider-dot" style="background:${model.providerColor}" title="${model.provider}"></div>
+            <div class="model-info">
+              <div class="model-name">${model.name}</div>
+              <div class="model-note">${model.note}</div>
+            </div>
+            <div class="model-rate">
+              $${model.inputPer1M.toFixed(2)}↑<br>
+              $${model.outputPer1M.toFixed(2)}↓<br>
+              <span style="color:var(--text-dim);font-size:0.65rem">per 1M</span>
+            </div>
+            <div class="context-bar-wrap" title="${usage.label} of ${model.contextWindow} context used">
+              <div class="context-bar-bg">
+                <div class="context-bar-fill" style="width:${fillPct}%"></div>
+              </div>
+              <div class="context-pct">${usage.label} ctx</div>
+            </div>
+            <div class="model-cost">
+              <div class="cost-value">${formatCost(totalCost)}</div>
+              <div class="cost-label">${currentOutputRatio > 0 ? 'in+out' : 'input'}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      pricingGrid.innerHTML = cards;
+    }
+
+    // Initialize
+    update();
+  </script>
+
+</body>
+</html>
